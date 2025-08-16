@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>คำนวนราคาสินค้า — เว็บคำนวนราคา</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1115; --panel:#141824; --muted:#8b93a7; --text:#e7e9ee; --brand:#6aa7ff; --ok:#59e3a7; --warn:#ffd166; --danger:#ff6b6b;
+    --ring: 0 0 0 2px rgba(106,167,255,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:radial-gradient(1200px 1200px at 10% -10%, rgba(106,167,255,.12), transparent 60%),
+    radial-gradient(1000px 800px at 120% 10%, rgba(89,227,167,.10), transparent 60%), var(--bg);
+    color:var(--text); font-family:Prompt, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+  header{
+    position:sticky; top:0; z-index:50; backdrop-filter:saturate(150%) blur(6px);
+    background:linear-gradient(180deg, rgba(20,24,36,.9) 0, rgba(20,24,36,.75) 60%, rgba(20,24,36,0) 100%);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .container{max-width:1100px; margin:0 auto; padding:20px}
+  .toolbar{
+    display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px}
+  .chip{padding:6px 10px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:var(--muted); font-size:12px}
+  .panel{background:rgba(20,24,36,.8); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px}
+  .grid{display:grid; gap:16px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+  label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
+  input[type="text"], input[type="number"], select{
+    width:100%; padding:12px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.02); color:var(--text); font-size:14px; outline:none;
+  }
+  input:focus, select:focus{box-shadow:var(--ring); border-color:rgba(106,167,255,.5)}
+  .row{display:grid; grid-template-columns:120px 110px 110px 90px 190px 1fr 120px; gap:10px; align-items:center}
+  .rowHdr{font-size:12px; color:var(--muted)}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  button{
+    appearance:none; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer;
+    background:linear-gradient(180deg, rgba(106,167,255,.2), rgba(106,167,255,.08)); color:var(--text);
+    border:1px solid rgba(106,167,255,.35); transition:transform .05s ease, box-shadow .2s ease;
+  }
+  button:hover{box-shadow:0 6px 24px -12px rgba(106,167,255,.6)}
+  button:active{transform:translateY(1px)}
+  .btn-ghost{background:transparent; border:1px dashed rgba(255,255,255,.2)}
+  .btn-danger{background:linear-gradient(180deg, rgba(255,107,107,.15), rgba(255,107,107,.06)); border-color:rgba(255,107,107,.45)}
+  .summary{
+    position:sticky; bottom:0; z-index:40; backdrop-filter:saturate(140%) blur(8px);
+    background:linear-gradient(180deg, rgba(20,24,36,.05), rgba(20,24,36,.85) 24%); border-top:1px solid rgba(255,255,255,.08);
+    padding:14px 0;
+  }
+  .mono{font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .right{display:flex; gap:12px; align-items:center}
+  .price-pill{padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12)}
+  .muted{color:var(--muted)}
+  .tot{font-size:22px; font-weight:700}
+  .table{display:grid; gap:8px}
+  .hint{font-size:11px; color:var(--muted)}
+  .sr{position:absolute; left:-9999px}
+  .opener{min-width:160px}
+  .print-only{display:none}
+  @media print{
+    body{background:white; color:#111}
+    header, .summary, .no-print{display:none !important}
+    .panel{border:0}
+    .print-only{display:block}
+    .row{grid-template-columns:100px 90px 90px 70px 150px 1fr 100px}
+    .price-pill{border-color:#999}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="container toolbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12h18M5 7h14M7 17h10" stroke="white" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/></svg>
+      <div>เว็บคำนวนราคา</div>
+      <span class="chip">v1 • Modern UI</span>
+    </div>
+    <div class="right no-print">
+      <button id="exportBtn" title="Export PDF (Ctrl/Cmd+P)">Export PDF</button>
+      <button class="btn-ghost" id="copyBtn" title="คัดลอกยอดรวม">คัดลอกยอดรวม</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div class="grid cols-2">
+    <section class="panel">
+      <h3 style="margin:0 0 10px">1) เลือกราคาสินค้า</h3>
+      <div class="grid cols-3">
+        <div>
+          <label>แพคเกจ</label>
+          <select id="pricePreset">
+            <option value="349">349 — ฉากทึบ</option>
+            <option value="799">799 — ฉากญี่ปุ่น</option>
+            <option value="899">899 — ฉากยูโร LA</option>
+            <option value="999">999 — ฉากยูโร LB</option>
+            <option value="custom">กำหนดเอง…</option>
+          </select>
+        </div>
+        <div>
+          <label>ราคา/ตร.ม. (ถ้าเลือกกำหนดเอง)</label>
+          <input type="number" id="customPrice" step="0.01" placeholder="เช่น 725" />
+        </div>
+        <div>
+          <label>รหัสใบเสนอราคา</label>
+          <input type="text" id="quoteCode" placeholder="เช่น Q-2025-001" />
+        </div>
+      </div>
+      <p class="hint">สูตร: กว้าง × สูง(หลังปัด) × 1.2 × ราคา/ตร.ม. × จำนวน</p>
+      <p class="hint">กว้างขั้นต่ำ 1.00 ม. • สูงขั้นต่ำ 2.00 ม. • การปัดความสูงตามช่วงที่กำหนดไว้ด้านล่าง</p>
+    </section>
+
+    <section class="panel">
+      <h3 style="margin:0 0 10px">2) ส่วนลด & ภาษี</h3>
+      <div class="grid cols-3">
+        <div>
+          <label>ส่วนลด (%)</label>
+          <input type="number" id="discountPct" min="0" max="100" step="0.01" value="0" />
+        </div>
+        <div>
+          <label>คิด VAT 7%</label>
+          <select id="vatMode">
+            <option value="exclude">คิด VAT</option>
+            <option value="none">ไม่คิด VAT</option>
+          </select>
+        </div>
+        <div>
+          <label>หมายเหตุ</label>
+          <input type="text" id="note" placeholder="เงื่อนไข / ติดตั้ง / ขนส่ง ฯลฯ" />
+        </div>
+      </div>
+      <details style="margin-top:8px">
+        <summary class="muted">ตารางปัดความสูงที่ใช้</summary>
+        <div class="hint" style="margin-top:6px; line-height:1.5">
+          - ไม่ถึง 2.00 → ใช้ 2.00<br/>
+          - &gt; 2.02 ถึง ≤ 2.20 → ใช้ 2.20<br/>
+          - &gt; 2.22 ถึง ≤ 2.40 → ใช้ 2.40<br/>
+          - &gt; 2.42 ถึง ≤ 2.60 → ใช้ 2.60<br/>
+          - &gt; 2.62 ถึง ≤ 2.80 → ใช้ 2.80<br/>
+          - &gt; 2.82 ถึง ≤ 3.00 → ใช้ 3.00<br/>
+          - &gt; 3.02 ถึง ≤ 3.30 → ใช้ 3.30<br/>
+          - &gt; 3.32 ถึง ≤ 3.50 → ใช้ 3.50
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:16px">
+    <h3 style="margin:0 0 10px">3) รายการคำนวน (สูงสุด 10 บรรทัด)</h3>
+
+    <div class="table">
+      <div class="row rowHdr">
+        <div>รหัสสินค้า</div>
+        <div>กว้าง (ม.)</div>
+        <div>สูง (ม.)</div>
+        <div>จำนวน</div>
+        <div>การเปิด</div>
+        <div>หมายเหตุ</div>
+        <div class="mono">ราคารายการ</div>
+      </div>
+      <div id="lines"></div>
+      <div class="actions no-print">
+        <button id="addLine">+ เพิ่มบรรทัด</button>
+        <button id="clearAll" class="btn-danger">ล้างทั้งหมด</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="summary">
+  <div class="container grid cols-3">
+    <div>
+      <div class="muted">รวมก่อนส่วนลด</div>
+      <div class="price-pill mono" id="sumSubtotal">0.00</div>
+    </div>
+    <div>
+      <div class="muted">ส่วนลด/VAT</div>
+      <div class="price-pill mono"><span id="sumDiscount">-0.00</span> / <span id="sumVat">+0.00</span></div>
+    </div>
+    <div>
+      <div class="muted">รวมสุทธิ</div>
+      <div class="price-pill tot mono" id="sumGrand">0.00</div>
+    </div>
+  </div>
+</section>
+
+<!-- เนื้อหาเฉพาะ PDF -->
+<section class="print-only container" id="printHeader">
+  <h2 style="margin:6px 0">ใบคำนวนราคา</h2>
+  <div id="printMeta" class="hint"></div>
+  <hr/>
+</section>
+
+<script>
+(function(){
+  const linesEl = document.getElementById('lines');
+  const addBtn = document.getElementById('addLine');
+  const clearBtn = document.getElementById('clearAll');
+  const exportBtn = document.getElementById('exportBtn');
+  const copyBtn = document.getElementById('copyBtn');
+
+  const pricePreset = document.getElementById('pricePreset');
+  const customPrice = document.getElementById('customPrice');
+  const quoteCode = document.getElementById('quoteCode');
+  const discountPct = document.getElementById('discountPct');
+  const vatMode = document.getElementById('vatMode');
+  const note = document.getElementById('note');
+
+  const sumSubtotal = document.getElementById('sumSubtotal');
+  const sumDiscount = document.getElementById('sumDiscount');
+  const sumVat = document.getElementById('sumVat');
+  const sumGrand = document.getElementById('sumGrand');
+  const printMeta = document.getElementById('printMeta');
+
+  const OPENERS = [
+    "เปิดข้างเดียว",
+    "เปิดกลาง",
+    "เปิดข้างอิสระ",
+    "เปิดอิสระ 4ด้าน"
+  ];
+
+  function fmt(n){
+    return (isFinite(n)? n:0).toLocaleString('th-TH',{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function getUnitPrice(){
+    const p = pricePreset.value;
+    if(p === 'custom'){
+      const v = parseFloat(customPrice.value);
+      return isFinite(v) && v>0 ? v : 0;
+    }
+    return parseFloat(p);
+  }
+
+  // ปัดความสูงตามกฎที่ผู้ใช้ระบุ (ทำตามเงื่อนไขอย่างเคร่งครัด)
+  function normalizeHeight(h){
+    if(!isFinite(h) || h<=0) return 0;
+    if(h < 2.0) return 2.0;
+    if(h > 2.02 && h <= 2.20) return 2.20;
+    if(h > 2.22 && h <= 2.40) return 2.40;
+    if(h > 2.42 && h <= 2.60) return 2.60;
+    if(h > 2.62 && h <= 2.80) return 2.80;
+    if(h > 2.82 && h <= 3.00) return 3.00;
+    if(h > 3.02 && h <= 3.30) return 3.30;
+    if(h > 3.32 && h <= 3.50) return 3.50;
+    return h; // นอกเหนือช่วง ให้ใช้ค่าจริง
+  }
+
+  function effectiveWidth(w){
+    if(!isFinite(w) || w<=0) return 0;
+    return w < 1 ? 1 : w;
+  }
+
+  function lineTemplate(){
+    const wrap = document.createElement('div');
+    wrap.className = 'row';
+    wrap.innerHTML = `
+      <input type="text" placeholder="SKU/รหัส" class="sku">
+      <input type="number" step="0.01" min="0" placeholder="เช่น 1.50" class="w">
+      <input type="number" step="0.01" min="0" placeholder="เช่น 2.46" class="h">
+      <input type="number" step="1" min="1" value="1" class="q">
+      <select class="opener">
+        ${OPENERS.map(o=>`<option>${o}</option>`).join('')}
+      </select>
+      <input type="text" placeholder="หมายเหตุ" class="memo">
+      <div class="mono lineTotal">0.00</div>
+    `;
+    // เพิ่มลบเฉพาะโหมดหน้าจอ
+    const del = document.createElement('button');
+    del.className = 'btn-danger no-print';
+    del.textContent = 'ลบ';
+    del.style.justifySelf = 'end';
+    del.addEventListener('click', ()=>{ wrap.remove(); recalc(); });
+    wrap.appendChild(del);
+    return wrap;
+  }
+
+  function addLine(){
+    if(linesEl.children.length >= 10) return;
+    const row = lineTemplate();
+    linesEl.appendChild(row);
+    bindRow(row);
+    recalc();
+  }
+
+  function clearAll(){
+    linesEl.innerHTML = '';
+    addLine();
+  }
+
+  function bindRow(row){
+    const inputs = row.querySelectorAll('input, select');
+    inputs.forEach(el=>{
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+    // Enter เพื่อเพิ่มบรรทัดใหม่
+    row.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        addLine();
+        // โฟกัสไปคอลัมน์แรกของแถวใหม่
+        const last = linesEl.lastElementChild;
+        last && last.querySelector('input,select')?.focus();
+      }
+    });
+  }
+
+  function computeLineTotal(w, h, q, unitPrice){
+    const W = effectiveWidth(w);
+    const H = normalizeHeight(h);
+    const Q = isFinite(q) && q>0 ? q : 0;
+    if(!(W>0 && H>0 && Q>0 && unitPrice>0)) return 0;
+    return W * H * 1.2 * unitPrice * Q;
+  }
+
+  function recalc(){
+    const unitPrice = getUnitPrice();
+    let subtotal = 0;
+
+    [...linesEl.children].forEach(row=>{
+      const w = parseFloat(row.querySelector('.w').value);
+      const h = parseFloat(row.querySelector('.h').value);
+      const q = parseFloat(row.querySelector('.q').value);
+      const total = computeLineTotal(w,h,q,unitPrice);
+      row.querySelector('.lineTotal').textContent = fmt(total);
+      subtotal += total;
+    });
+
+    const discPct = Math.min(Math.max(parseFloat(discountPct.value||0), 0), 100);
+    const discount = subtotal * (discPct/100);
+    const afterDisc = subtotal - discount;
+    const vat = (vatMode.value === 'exclude') ? afterDisc * 0.07 : 0;
+    const grand = afterDisc + vat;
+
+    sumSubtotal.textContent = fmt(subtotal);
+    sumDiscount.textContent = '-' + fmt(discount);
+    sumVat.textContent = '+' + fmt(vat);
+    sumGrand.textContent = fmt(grand);
+
+    // meta สำหรับหน้า print
+    const now = new Date();
+    printMeta.textContent = `เลขที่: ${quoteCode.value||'-'} • วันที่พิมพ์: ${now.toLocaleString('th-TH')} • ราคา/ตร.ม.: ${fmt(unitPrice)} บาท • ส่วนลด: ${fmt(discount)} • VAT: ${fmt(vat)} • รวมสุทธิ: ${fmt(grand)}`;
+  }
+
+  // Events
+  addBtn.addEventListener('click', addLine);
+  clearBtn.addEventListener('click', clearAll);
+  [pricePreset, customPrice, quoteCode, discountPct, vatMode, note].forEach(el=>{
+    el.addEventListener('input', recalc);
+    el.addEventListener('change', recalc);
+  });
+
+  pricePreset.addEventListener('change', ()=>{
+    if(pricePreset.value === 'custom'){
+      customPrice.focus();
+    }
+    recalc();
+  });
+
+  exportBtn.addEventListener('click', ()=>{
+    window.print();
+  });
+
+  copyBtn.addEventListener('click', ()=>{
+    const txt = sumGrand.textContent.replace(/[,]/g,'');
+    navigator.clipboard?.writeText(txt).then(()=> {
+      copyBtn.textContent = 'คัดลอกแล้ว!';
+      setTimeout(()=> copyBtn.textContent = 'คัดลอกยอดรวม', 1200);
+    });
+  });
+
+  // bootstrap
+  addLine(); addLine(); // ใส่ตัวอย่าง 2 บรรทัดให้เริ่ม
+  // ตัวอย่างเพื่อเทสตามโจทย์:
+  const rows = [...linesEl.children];
+  // ตัวอย่าง 1: 1.50 × 2.46 × 1 ชุด ราคา 349 → ปัดสูงเป็น 2.60 ตามช่วง (>2.42 ถึง ≤2.60)
+  rows[0].querySelector('.sku').value = 'A001';
+  rows[0].querySelector('.w').value = 1.50;
+  rows[0].querySelector('.h').value = 2.46;
+  rows[0].querySelector('.q').value = 1;
+
+  // ตัวอย่าง 2: 0.94 × 1.87 → ขั้นต่ำเป็น 1.00 × 2.00
+  rows[1].querySelector('.sku').value = 'B002';
+  rows[1].querySelector('.w').value = 0.94;
+  rows[1].querySelector('.h').value = 1.87;
+  rows[1].querySelector('.q').value = 1;
+
+  pricePreset.value = "349";
+  recalc();
+})();
+</script>
+</body>
+</html>
