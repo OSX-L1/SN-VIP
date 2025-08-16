@@ -627,9 +627,15 @@ let userId = 'anonymous'; // Default to anonymous
       loadGlobalSettings();
     });
   } catch (error) {
-    console.error("Error initializing Firebase or authentication:", error);
-    // อาจแสดงข้อความแสดงข้อผิดพลาดที่เป็นมิตรต่อผู้ใช้
-    document.getElementById('userIdDisplay').textContent = 'Error: Firebase init failed.';
+    console.error("Firebase Initialization Error:", error);
+    // แสดงข้อความข้อผิดพลาดที่เฉพาะเจาะจงมากขึ้นบน UI
+    document.getElementById('userIdDisplay').textContent = `Error: Firebase init failed. (${error.code || error.message})`;
+    // ปิดการใช้งาน Input และปุ่ม Admin Login หาก Firebase ล้มเหลว
+    pricePreset.disabled = true;
+    customPrice.disabled = true;
+    discountPct.disabled = true;
+    vatMode.disabled = true;
+    adminLoginBtn.disabled = true;
   }
 
 
@@ -847,6 +853,7 @@ let userId = 'anonymous'; // Default to anonymous
 
   // เติมตัวเลือก price preset ใน select dropdown
   function populatePricePresetSelect(presets){
+    console.log("Populating price presets with:", presets); // เพิ่ม console.log ที่นี่
     pricePreset.innerHTML = '';
     presets.forEach(p => {
       const option = document.createElement('option');
