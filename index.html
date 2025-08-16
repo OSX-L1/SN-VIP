@@ -7,73 +7,302 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0f1115; --panel:#141824; --muted:#8b93a7; --text:#e7e9ee; --brand:#6aa7ff; --ok:#59e3a7; --warn:#ffd166; --danger:#ff6b6b;
-    --ring: 0 0 0 2px rgba(106,167,255,.35);
+/* * 🎨 การปรับปรุง CSS:
+ * เปลี่ยนจากธีมสีเข้มเป็นโทนสีขาว-เทาอ่อน
+ * เพิ่มเงา (box-shadow) และความโค้งมน (border-radius) เพื่อให้ดูสบายตาและมีมิติ
+ * ปรับปรุงการจัดวางและระยะห่างเล็กน้อย
+ */
+:root {
+  --bg: #f0f2f5; /* สีพื้นหลังโดยรวม - เทาอ่อน */
+  --panel: #ffffff; /* สีพื้นหลังของ Panel - ขาวสะอาด */
+  --muted: #6b7280; /* สีข้อความที่จางลง - เทาเข้ม */
+  --text: #1f2937; /* สีข้อความหลัก - เทาดำ */
+  --brand: #2563eb; /* สีแบรนด์/ไฮไลต์ - น้ำเงิน */
+  --ok: #10b981; /* สีสำหรับสถานะ OK/สำเร็จ - เขียว */
+  --warn: #fbbf24; /* สีสำหรับสถานะ Warning - ส้ม */
+  --danger: #ef4444; /* สีสำหรับสถานะ Danger/ผิดพลาด - แดง */
+  --ring: 0 0 0 2px rgba(37, 99, 235, .25); /* เงารอบ input ตอน focus */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* เปลี่ยนพื้นหลังเป็นสีเรียบ ไม่มี gradient */
+  background: var(--bg);
+  color: var(--text);
+  font-family: Prompt, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.5; /* เพิ่ม line-height เพื่อให้อ่านง่ายขึ้น */
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: saturate(150%) blur(6px);
+  /* ปรับพื้นหลัง header ให้เข้ากับธีมขาว */
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* ปรับสีเส้นแบ่ง */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* เพิ่มเงาเล็กน้อย */
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: var(--text); /* ปรับสีข้อความแบรนด์ */
+}
+
+.brand svg {
+  stroke: var(--brand); /* ให้ไอคอนมีสีแบรนด์ */
+  stroke-opacity: 1;
+}
+
+.chip {
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1); /* ปรับสีเส้นขอบ */
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.03); /* เพิ่มพื้นหลังเล็กน้อย */
+}
+
+.panel {
+  background: var(--panel); /* ใช้สี Panel ที่กำหนดใหม่ */
+  border: 1px solid rgba(0, 0, 0, 0.08); /* ปรับสีเส้นขอบ */
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* เพิ่มเงาให้ดูมีมิติ */
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+label {
+  font-size: 12px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.15); /* ปรับสีเส้นขอบ input */
+  background: rgba(255, 255, 255, 0.9); /* ปรับพื้นหลัง input */
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease; /* เพิ่ม transition */
+}
+
+input:focus,
+select:focus {
+  box-shadow: var(--ring);
+  border-color: var(--brand); /* ใช้สีแบรนด์เมื่อ focus */
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 120px 110px 110px 90px 190px 1fr 120px;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0; /* เพิ่ม padding เล็กน้อย */
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.05); /* เส้นแบ่งระหว่างแถว */
+}
+.row:last-of-type {
+    border-bottom: none; /* ลบเส้นแบ่งที่แถวสุดท้าย */
+}
+
+.rowHdr {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600; /* ทำให้หัวตารางเข้มขึ้น */
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px; /* เพิ่มระยะห่างด้านบน */
+}
+
+button {
+  appearance: none;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  /* ปรับสีและ gradient ของปุ่มหลัก */
+  background: linear-gradient(180deg, var(--brand), var(--brand));
+  color: #ffffff; /* สีข้อความปุ่มเป็นขาว */
+  border: 1px solid var(--brand);
+  transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); /* เพิ่มเงาให้ปุ่ม */
+}
+
+button:hover {
+  background: linear-gradient(180deg, var(--brand), var(--brand)); /* ทำให้สีเข้มขึ้นเล็กน้อยเมื่อ hover */
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px); /* ยกขึ้นเล็กน้อยเมื่อ hover */
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2); /* เงาลดลงเมื่อ active */
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.15); /* ปรับสีเส้นประ */
+  color: var(--text);
+  box-shadow: none; /* ลบเงาสำหรับปุ่ม ghost */
+}
+
+.btn-ghost:hover {
+    background: rgba(0, 0, 0, 0.05); /* เพิ่มพื้นหลังเล็กน้อยเมื่อ hover */
+    box-shadow: none;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, var(--danger), var(--danger));
+  border-color: var(--danger);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(180deg, var(--danger), var(--danger));
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+
+.summary {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  backdrop-filter: saturate(140%) blur(8px);
+  /* ปรับพื้นหลัง summary ให้เข้ากับธีมขาว */
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 14px 0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05); /* เพิ่มเงาเล็กน้อย */
+}
+
+.mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.price-pill {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05); /* ปรับสีพื้นหลัง pill */
+  border: 1px solid rgba(0, 0, 0, 0.12); /* ปรับสีเส้นขอบ pill */
+  color: var(--text); /* ปรับสีข้อความ pill */
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.tot {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand); /* ทำให้ยอดรวมเด่นขึ้น */
+}
+
+.table {
+  display: grid;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.sr {
+  position: absolute;
+  left: -9999px;
+}
+
+.opener {
+  min-width: 160px;
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  body {
+    background: white;
+    color: #111;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;background:radial-gradient(1200px 1200px at 10% -10%, rgba(106,167,255,.12), transparent 60%),
-    radial-gradient(1000px 800px at 120% 10%, rgba(89,227,167,.10), transparent 60%), var(--bg);
-    color:var(--text); font-family:Prompt, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  header,
+  .summary,
+  .no-print {
+    display: none !important;
   }
-  header{
-    position:sticky; top:0; z-index:50; backdrop-filter:saturate(150%) blur(6px);
-    background:linear-gradient(180deg, rgba(20,24,36,.9) 0, rgba(20,24,36,.75) 60%, rgba(20,24,36,0) 100%);
-    border-bottom:1px solid rgba(255,255,255,.06);
+  .panel {
+    border: 0;
+    box-shadow: none;
   }
-  .container{max-width:1100px; margin:0 auto; padding:20px}
-  .toolbar{
-    display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  .print-only {
+    display: block;
   }
-  .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px}
-  .chip{padding:6px 10px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:var(--muted); font-size:12px}
-  .panel{background:rgba(20,24,36,.8); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px}
-  .grid{display:grid; gap:16px}
-  .grid.cols-2{grid-template-columns:1fr 1fr}
-  .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-  label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px}
-  input[type="text"], input[type="number"], select{
-    width:100%; padding:12px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.14);
-    background:rgba(255,255,255,.02); color:var(--text); font-size:14px; outline:none;
+  .row {
+    grid-template-columns: 100px 90px 90px 70px 150px 1fr 100px;
+    border-bottom: 1px solid #ccc; /* ใช้เส้นทึบสำหรับ print */
   }
-  input:focus, select:focus{box-shadow:var(--ring); border-color:rgba(106,167,255,.5)}
-  .row{display:grid; grid-template-columns:120px 110px 110px 90px 190px 1fr 120px; gap:10px; align-items:center}
-  .rowHdr{font-size:12px; color:var(--muted)}
-  .actions{display:flex; gap:8px; flex-wrap:wrap}
-  button{
-    appearance:none; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer;
-    background:linear-gradient(180deg, rgba(106,167,255,.2), rgba(106,167,255,.08)); color:var(--text);
-    border:1px solid rgba(106,167,255,.35); transition:transform .05s ease, box-shadow .2s ease;
+  .price-pill {
+    border-color: #999;
+    background: #f8f8f8;
   }
-  button:hover{box-shadow:0 6px 24px -12px rgba(106,167,255,.6)}
-  button:active{transform:translateY(1px)}
-  .btn-ghost{background:transparent; border:1px dashed rgba(255,255,255,.2)}
-  .btn-danger{background:linear-gradient(180deg, rgba(255,107,107,.15), rgba(255,107,107,.06)); border-color:rgba(255,107,107,.45)}
-  .summary{
-    position:sticky; bottom:0; z-index:40; backdrop-filter:saturate(140%) blur(8px);
-    background:linear-gradient(180deg, rgba(20,24,36,.05), rgba(20,24,36,.85) 24%); border-top:1px solid rgba(255,255,255,.08);
-    padding:14px 0;
-  }
-  .mono{font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
-  .right{display:flex; gap:12px; align-items:center}
-  .price-pill{padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12)}
-  .muted{color:var(--muted)}
-  .tot{font-size:22px; font-weight:700}
-  .table{display:grid; gap:8px}
-  .hint{font-size:11px; color:var(--muted)}
-  .sr{position:absolute; left:-9999px}
-  .opener{min-width:160px}
-  .print-only{display:none}
-  @media print{
-    body{background:white; color:#111}
-    header, .summary, .no-print{display:none !important}
-    .panel{border:0}
-    .print-only{display:block}
-    .row{grid-template-columns:100px 90px 90px 70px 150px 1fr 100px}
-    .price-pill{border-color:#999}
-  }
+}
 </style>
 </head>
 <body>
@@ -142,13 +371,13 @@
         <summary class="muted">ตารางปัดความสูงที่ใช้</summary>
         <div class="hint" style="margin-top:6px; line-height:1.5">
           - ไม่ถึง 2.00 → ใช้ 2.00<br/>
-          - &gt; 2.02 ถึง ≤ 2.20 → ใช้ 2.20<br/>
-          - &gt; 2.22 ถึง ≤ 2.40 → ใช้ 2.40<br/>
-          - &gt; 2.42 ถึง ≤ 2.60 → ใช้ 2.60<br/>
-          - &gt; 2.62 ถึง ≤ 2.80 → ใช้ 2.80<br/>
-          - &gt; 2.82 ถึง ≤ 3.00 → ใช้ 3.00<br/>
-          - &gt; 3.02 ถึง ≤ 3.30 → ใช้ 3.30<br/>
-          - &gt; 3.32 ถึง ≤ 3.50 → ใช้ 3.50
+          - > 2.02 ถึง ≤ 2.20 → ใช้ 2.20<br/>
+          - > 2.22 ถึง ≤ 2.40 → ใช้ 2.40<br/>
+          - > 2.42 ถึง ≤ 2.60 → ใช้ 2.60<br/>
+          - > 2.62 ถึง ≤ 2.80 → ใช้ 2.80<br/>
+          - > 2.82 ถึง ≤ 3.00 → ใช้ 3.00<br/>
+          - > 3.02 ถึง ≤ 3.30 → ใช้ 3.30<br/>
+          - > 3.32 ถึง ≤ 3.50 → ใช้ 3.50
         </div>
       </details>
     </section>
