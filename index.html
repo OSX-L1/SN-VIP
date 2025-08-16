@@ -572,27 +572,41 @@ button:active {
 </section>
 
 <script type="module">
-// Global Firebase variables provided by the Canvas environment
+// Global Firebase variables provided by the Canvas environment (now unused for firebaseConfig)
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+// const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {}; // This line is now commented out/replaced
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 // --- End Global Firebase variables ---
 
-// Firebase Imports
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+// Your web app's Firebase configuration - DIRECTLY EMBEDDED
+const firebaseConfig = {
+  apiKey: "AIzaSyDjuzPdv4ZsKF8RuSdAmiz2TZ9ypKm12m8",
+  authDomain: "sn1988.firebaseapp.com",
+  projectId: "sn1988",
+  storageBucket: "sn1988.firebasestorage.app",
+  messagingSenderId: "460771516585",
+  appId: "1:460771516585:web:ea6c7d5da89f000abcc9b8",
+  measurementId: "G-NLRB447MQ8"
+};
+
+// Firebase Imports - UPDATED TO 12.1.0
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js"; // Added as per your request
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 let app;
 let db;
 let auth;
+let analytics; // Declare analytics variable
 let userId = 'anonymous'; // Default to anonymous
 
-(async function(){ // ใช้ async IIFE เพื่อให้สามารถใช้ await สำหรับ Firebase init
+(async function(){ // Use async IIFE to allow await for Firebase init
 
   // 1. Initialise Firebase
   try {
     app = initializeApp(firebaseConfig);
+    analytics = getAnalytics(app); // Initialize analytics
     db = getFirestore(app);
     auth = getAuth(app);
 
